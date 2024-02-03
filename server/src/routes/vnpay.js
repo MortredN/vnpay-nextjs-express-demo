@@ -15,7 +15,7 @@ router.post('/create_payment_url', function (req, res, next) {
   const date = new Date()
 
   // Constants.VALID_ORDER_TYPES & https://sandbox.vnpayment.vn/apis/docs/loai-hang-hoa/
-  const orderType = '180000'
+  const orderType = '100000'
 
   if (!NumberUtils.isInteger(amount)) {
     res.status(422).json({ success: false, message: 'Số tiền thanh toán không đúng định dạng' })
