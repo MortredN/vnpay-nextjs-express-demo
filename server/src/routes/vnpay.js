@@ -4,7 +4,6 @@ const moment = require('moment')
 const qs = require('qs')
 const crypto = require('crypto')
 
-const NumberUtils = require('../utils/NumberUtils')
 const ObjectUtils = require('../utils/ObjectUtils')
 const Constants = require('../configs/Constants')
 
@@ -16,10 +15,6 @@ router.post('/create_payment_url', function (req, res, next) {
 
   // Constants.VALID_ORDER_TYPES & https://sandbox.vnpayment.vn/apis/docs/loai-hang-hoa/
   const orderType = '100000'
-
-  if (!NumberUtils.isInteger(amount)) {
-    res.status(422).json({ success: false, message: 'Số tiền thanh toán không đúng định dạng' })
-  }
 
   // https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html
   let vnpQueryParams = {}
