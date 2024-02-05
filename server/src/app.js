@@ -6,6 +6,7 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const http = require('http')
 const logger = require('morgan')
+const cors = require('cors')
 
 async function init() {
   const db = require('./db')
@@ -18,8 +19,9 @@ async function init() {
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
   app.use(express.static(path.join(__dirname, 'public')))
+  app.use(cors({ origin: process.env.CLIENT_ROOT }))
 
-  app.use('/', require('./routes/index'))
+  app.use('/api', require('./routes/index'))
 
   var server = http.createServer(app)
 

@@ -70,7 +70,7 @@ router.get('/return', function (req, res, next) {
     const rspCode = vnpQueryParams['vnp_ResponseCode']
     const message = Constants.VNPAY_RSP_CODES_PAY.find((item) => item.rspCode == rspCode)?.message
     if (rspCode == '00') {
-      res.json({ success: false, message })
+      res.json({ success: true, message })
     } else {
       res.json({ success: false, message })
     }
