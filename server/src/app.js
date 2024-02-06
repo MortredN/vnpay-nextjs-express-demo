@@ -19,7 +19,10 @@ async function init() {
   app.use(express.urlencoded({ extended: false }))
   app.use(cookieParser())
   app.use(express.static(path.join(__dirname, 'public')))
-  app.use(cors({ origin: process.env.CLIENT_ROOT }))
+  app.use(cors({
+    origin: process.env.CLIENT_ROOT,
+    credentials: true
+  }))
 
   app.use('/api', require('./routes/index'))
 

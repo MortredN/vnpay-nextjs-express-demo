@@ -2,15 +2,19 @@
 
 import { addProductToCart } from '@/hooks/product'
 import Image from 'next/image'
+import { useRouter } from 'next/router';
 import { Cookies } from 'react-cookie';
 
 const cookies = new Cookies();
 
 export default function ProductCard({ product }) {
+  const router = useRouter();
+
   async function addToCart() {
     const res = await addProductToCart(product.id)
     if (res.success) {
       cookies.set('_vnpaydemo_cart_session_id', res.data?.sessionId)
+      router.push('/cart')
     }
   }
 
@@ -24,7 +28,7 @@ export default function ProductCard({ product }) {
             src={product.image}
             alt={product.name}
             className="object-cover rounded-xl"
-          ></Image>
+          />
         </div>
         <div className="flex flex-col items-center">
           <h1 className="text-base font-medium group-hover:underline">{product.name}</h1>

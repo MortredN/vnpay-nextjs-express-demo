@@ -7,6 +7,35 @@ router.get('/', async function (req, res, next) {
   res.json({ success: true, data: products })
 })
 
+router.get('/cart', async function (req, res, next) {
+  const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
+
+  let session = null
+
+  if (cookieSessionId) {
+    session = await CartSession.findByPk(cookieSessionId, {
+      include: [
+        {
+          model: Product,
+          attributes: ['id', 'name', 'price', 'image'],
+          through: { attributes: ['quantity'] }
+        }
+      ]
+    })
+    session = session.toJSON()
+    if (Array.isArray(session.Products)) {
+      for (const product of session.Products) {
+        if (product.CartItem?.quantity) {
+          product.quantity = product.CartItem.quantity
+          delete product.CartItem
+        }
+      }
+    }
+  }
+
+  res.json({ success: true, data: session })
+})
+
 router.post('/add-cart', async function (req, res, next) {
   const { productId } = req.body
   const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
@@ -39,10 +68,32 @@ router.post('/add-cart', async function (req, res, next) {
     }
   })
   if (!created) {
-    cartItem.update({ quantity: cartItem.quantity + 1 })
+    await cartItem.update({ quantity: cartItem.quantity + 1 })
   }
 
   res.json({ success: true, data: { sessionId } })
+})
+
+router.post('/update-cart-quantity', async function (req, res, next) {
+  const { productId, quantity } = req.body
+  const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
+
+  if (cookieSessionId) {
+    const cartItem = await CartItem.findOne({
+      where: { productId, sessionId: cookieSessionId }
+    })
+    
+    if (cartItem) {
+      if (quantity) {
+        await cartItem.update({ quantity })
+      }
+      else {
+        await cartItem.destroy()
+      }
+    }
+  }
+
+  res.json({ success: true, message: "Update successfully" })
 })
 
 module.exports = router
