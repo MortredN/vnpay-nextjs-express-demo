@@ -1,5 +1,6 @@
 'use client'
 
+import { createPaymentUrl } from '@/hooks/order'
 import { getShoppingCart, updateShoppingCartItemQuantity } from '@/hooks/product'
 import debounce from 'lodash.debounce'
 import Image from 'next/image'
@@ -107,6 +108,13 @@ export default function ShoppingCart() {
     getShoppingCart().then((res) => setCartItems(res.data?.Products))
   }, [])
 
+  async function redirectToPayment() {
+    const res = await createPaymentUrl()
+    if (res.success) {
+      window.location.href = res.vnpUrl
+    }
+  }
+
   return (
     <div className="flex w-full">
       {sessionId && cartItems.length > 0 ? (
@@ -135,7 +143,11 @@ export default function ShoppingCart() {
                   cartItems.reduce((prev, ci) => (prev += ci.quantity * ci.price), 0)
                 )}
               </span>
-              <button type="button" className="py-2 px-4 w-full bg-blue-900 rounded-lg mt-8" onClick={() => {}}>
+              <button
+                type="button"
+                onClick={redirectToPayment}
+                className="py-2 px-4 w-full bg-blue-900 rounded-lg mt-8"
+              >
                 Thanh toán
               </button>
             </div>

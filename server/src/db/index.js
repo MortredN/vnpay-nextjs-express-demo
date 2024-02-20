@@ -45,6 +45,8 @@ async function initDB() {
   db.Product = require('../models/Product.model')(sequelize)
   db.CartSession = require('../models/CartSession.model')(sequelize)
   db.CartItem = require('../models/CartItem.model')(sequelize)
+  db.Order = require('../models/Order.model')(sequelize)
+  db.OrderItem = require('../models/OrderItem.model')(sequelize)
 
   applyAssociations(db)
 

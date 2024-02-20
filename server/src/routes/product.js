@@ -82,18 +82,17 @@ router.post('/update-cart-quantity', async function (req, res, next) {
     const cartItem = await CartItem.findOne({
       where: { productId, sessionId: cookieSessionId }
     })
-    
+
     if (cartItem) {
       if (quantity) {
         await cartItem.update({ quantity })
-      }
-      else {
+      } else {
         await cartItem.destroy()
       }
     }
   }
 
-  res.json({ success: true, message: "Update successfully" })
+  res.json({ success: true, message: 'Update successfully' })
 })
 
 module.exports = router
