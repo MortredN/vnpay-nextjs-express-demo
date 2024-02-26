@@ -1,7 +1,7 @@
 'use client'
 
 import { createPaymentUrl } from '@/hooks/order'
-import { getShoppingCart, updateShoppingCartItemQuantity } from '@/hooks/product'
+import { getShoppingCart, updateShoppingCartItemQuantity } from '@/hooks/cart'
 import debounce from 'lodash.debounce'
 import Image from 'next/image'
 import Link from 'next/link'

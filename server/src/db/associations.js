@@ -7,6 +7,9 @@ function applyAssociations(db) {
   CartSession.belongsToMany(Product, { through: CartItem, foreignKey: 'sessionId' })
   Product.belongsToMany(CartSession, { through: CartItem, foreignKey: 'productId' })
 
+  CartSession.hasOne(Order, { foreignKey: 'sessionId' })
+  Order.belongsTo(CartSession, { foreignKey: 'sessionId' })
+
   User.hasOne(Order, { foreignKey: 'userId' })
   Order.belongsTo(User, { foreignKey: 'userId' })
 

@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import ShoppingCartCounter from '@/components/ShoppingCartCounter'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,8 +21,9 @@ export default function RootLayout({ children }) {
               <h1 className="text-3xl font-bold">Demo Shop</h1>
             </Link>
             <Link href="/cart" className="absolute w-9 h-9 md:top-4 right-0 md:right-4">
-              <div className='flex w-full h-full items-center justify-center relative'>
+              <div className="flex w-full h-full items-center justify-center relative">
                 <Image src="/images/cart.svg" alt="Cart" width={32} height={32} priority />
+                <ShoppingCartCounter />
               </div>
             </Link>
           </div>

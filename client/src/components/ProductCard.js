@@ -1,6 +1,6 @@
 'use client'
 
-import { addProductToCart } from '@/hooks/product'
+import { addProductToCart } from '@/hooks/cart'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import { Cookies } from 'react-cookie';

@@ -19,12 +19,12 @@ router.post('/create_payment_url', async function (req, res, next) {
   process.env.TZ = 'Asia/Ho_Chi_Minh'
   const date = new Date()
 
-  const order = await Order.create()
-  const session = await CartSession.findByPk('f95d980a-fb88-4442-ad8f-6b57a5996857', {
+  const order = await Order.create({ sessionId: cookieSessionId })
+  const session = await CartSession.findByPk(cookieSessionId, {
     include: [
       {
         model: Product,
-        attributes: ['price'],
+        attributes: ['id', 'price'],
         through: { attributes: ['quantity'] }
       }
     ]
@@ -95,7 +95,7 @@ router.get('/return', async function (req, res, next) {
   const secureHash = vnpQueryParams['vnp_SecureHash']
   delete vnpQueryParams['vnp_SecureHash']
 
-  vnpQueryParams = ObjectUtils.sortAndEncodeObject(vnp_Params)
+  vnpQueryParams = ObjectUtils.sortAndEncodeObject(vnpQueryParams)
 
   const vnpQueryParamsQS = qs.stringify(vnpQueryParams, { encode: false })
   const hmac = crypto.createHmac('sha512', process.env.VNP_HASH_SECRET)
@@ -110,8 +110,14 @@ router.get('/return', async function (req, res, next) {
     const rspCode = vnpQueryParams['vnp_ResponseCode']
     message = Constants.VNPAY_RSP_CODES_PAY.find((item) => item.rspCode == rspCode)?.message
     if (rspCode == '00') {
-      success = true
       await order.update({ status: 'success' })
+      success = true
+
+      const session = await CartSession.findByPk(order.sessionId)
+      const now = new Date()
+      if (session) {
+        await session.update({ expiredAt: now })
+      }
     }
   }
 
