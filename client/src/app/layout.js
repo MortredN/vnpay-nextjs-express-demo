@@ -20,12 +20,15 @@ export default function RootLayout({ children }) {
             <Link href="/">
               <h1 className="text-3xl font-bold">Demo Shop</h1>
             </Link>
-            <Link href="/cart" className="absolute w-9 h-9 md:top-4 right-0 md:right-4">
-              <div className="flex w-full h-full items-center justify-center relative">
+            <div className="absolute md:top-4 right-0 md:right-4 flex items-center justify-right gap-x-4">
+              <Link href="/login" className="flex w-9 h-9 items-center justify-center relative">
+                <Image src="/images/user.svg" alt="User" width={32} height={32} priority />
+              </Link>
+              <Link href="/cart" className="flex w-9 h-9 items-center justify-center relative">
                 <Image src="/images/cart.svg" alt="Cart" width={32} height={32} priority />
                 <ShoppingCartCounter />
-              </div>
-            </Link>
+              </Link>
+            </div>
           </div>
           {children}
         </main>
