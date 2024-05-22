@@ -9,6 +9,7 @@ exports.authenticate = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
       if (decoded) {
         const user = await User.findByPk(decoded.id)
+        console.log('CHECK A', !!user)
         if (user) {
           req.user = user
         }

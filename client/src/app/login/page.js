@@ -41,6 +41,7 @@ const Login = () => {
 
     if (res.success) {
       cookies.set('_vnpaydemo_jwt', res.data?.token)
+      cookies.set('_vnpaydemo_cart_session_id', res.data?.sessionId)
       window.location.replace('/')
     } else {
       alert(res.message)

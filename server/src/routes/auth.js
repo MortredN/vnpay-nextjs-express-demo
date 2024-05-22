@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { User } = require('../db')
+
+const { User, CartSession } = require('../db')
 
 router.post('/register', async function (req, res, next) {
   const { email, password } = req.body
@@ -27,7 +28,12 @@ router.post('/register', async function (req, res, next) {
     process.env.JWT_SECRET
   )
 
-  res.json({ success: true, data: { token } })
+  const now = new Date()
+  const newExpiredAt = new Date().setDate(now.getDate() + 7)
+  const session = await CartSession.create({ userId: user.id, expiredAt: newExpiredAt })
+  const sessionId = session.id
+
+  res.json({ success: true, data: { token, sessionId } })
 })
 
 router.post('/login', async function (req, res, next) {
@@ -49,7 +55,12 @@ router.post('/login', async function (req, res, next) {
     process.env.JWT_SECRET
   )
 
-  res.json({ success: true, data: { token } })
+  const now = new Date()
+  const newExpiredAt = new Date().setDate(now.getDate() + 7)
+  const session = await CartSession.create({ userId: user.id, expiredAt: newExpiredAt })
+  const sessionId = session.id
+
+  res.json({ success: true, data: { token, sessionId } })
 })
 
 module.exports = router

@@ -16,9 +16,9 @@ const UserOptions = ({ jwt }) => {
           </button>
           {showOptions && (
             <div className="bg-white rouned-lg flex flex-col items-start absolute right-6 top-6">
-              <button type="button" className="p-2 pr-6" onClick={() => {}}>
+              <Link href="/orders" className="p-2 pr-6">
                 Orders
-              </button>
+              </Link>
               <span className="w-full h-px bg-black" />
               <Link href="/logout" className="p-2 pr-6">
                 Logout

@@ -117,7 +117,7 @@ export default function ShoppingCart() {
 
   return (
     <div className="flex w-full">
-      {sessionId && cartItems.length > 0 ? (
+      {sessionId && cartItems?.length > 0 ? (
         <div className="flex w-full gap-x-8">
           <div className="w-3/4">
             <table className="w-full text-left">

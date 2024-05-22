@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+
 const { Product } = require('../db')
 
 router.get('/', async function (req, res, next) {

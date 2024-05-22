@@ -1,15 +1,23 @@
 const express = require('express')
 const router = express.Router()
-const { Product, CartSession, CartItem } = require('../db')
 const { Op } = require('sequelize')
 
-router.get('/', async function (req, res, next) {
+const { Product, CartSession, CartItem } = require('../db')
+const middleware = require('../middleware')
+
+router.get('/', [middleware.authenticate], async function (req, res, next) {
   const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
 
   let session = null
 
   if (cookieSessionId) {
-    session = await CartSession.findByPk(cookieSessionId, {
+    const query = { id: cookieSessionId }
+    if (req.user) {
+      query.userId = req.user.id
+    }
+
+    session = await CartSession.findOne({
+      where: query,
       include: [
         {
           model: Product,
@@ -34,7 +42,7 @@ router.get('/', async function (req, res, next) {
   res.json({ success: true, data: session })
 })
 
-router.get('/check', async function (req, res, next) {
+router.get('/check', [middleware.authenticate], async function (req, res, next) {
   const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
 
   let expired = true
@@ -44,8 +52,13 @@ router.get('/check', async function (req, res, next) {
   const now = new Date()
 
   if (cookieSessionId) {
+    const query = { id: cookieSessionId, expiredAt: { [Op.gte]: now } }
+    if (req.user) {
+      query.userId = req.user.id
+    }
+
     session = await CartSession.findOne({
-      where: { id: cookieSessionId, expiredAt: { [Op.gte]: now } },
+      where: query,
       include: [
         {
           model: Product,
@@ -65,7 +78,7 @@ router.get('/check', async function (req, res, next) {
   res.json({ success: true, data: { expired, count } })
 })
 
-router.post('/add', async function (req, res, next) {
+router.post('/add', [middleware.authenticate], async function (req, res, next) {
   const { productId } = req.body
   const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
 
@@ -74,20 +87,28 @@ router.post('/add', async function (req, res, next) {
     return res.status(404).json({ success: false, message: 'Product not found' })
   }
 
-  // TODO: If user is logged in, use user's session instead from cookie
   let sessionId = cookieSessionId
 
   const now = new Date()
   const newExpiredAt = new Date().setDate(now.getDate() + 7)
 
   if (sessionId) {
+    const query = { id: sessionId, expiredAt: { [Op.gte]: now } }
+    if (req.user) {
+      query.userId = req.user.id
+    }
+
     const [session] = await CartSession.findOrCreate({
       where: { id: sessionId, expiredAt: { [Op.gte]: now } },
-      defaults: { expiredAt: newExpiredAt }
+      defaults: req.user
+        ? { expiredAt: newExpiredAt, userId: req.user.id }
+        : { expiredAt: newExpiredAt }
     })
     sessionId = session.id
   } else {
-    const session = await CartSession.create({ expiredAt: newExpiredAt })
+    const session = await CartSession.create(
+      req.user ? { expiredAt: newExpiredAt, userId: req.user.id } : { expiredAt: newExpiredAt }
+    )
     sessionId = session.id
   }
 

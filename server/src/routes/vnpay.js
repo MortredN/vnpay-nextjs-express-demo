@@ -5,10 +5,11 @@ const qs = require('qs')
 const crypto = require('crypto')
 
 const { CartSession, Product, Order, OrderItem } = require('../db')
+const middleware = require('../middleware')
 const ObjectUtils = require('../utils/ObjectUtils')
 const Constants = require('../configs/Constants')
 
-router.post('/create_payment_url', async function (req, res, next) {
+router.post('/create_payment_url', [middleware.authenticate], async function (req, res, next) {
   const { _vnpaydemo_cart_session_id: cookieSessionId } = req.cookies
   const { locale, bankCode } = req.body
 
@@ -16,11 +17,12 @@ router.post('/create_payment_url', async function (req, res, next) {
     return res.status(404).json({ success: false, message: 'Cart not found' })
   }
 
-  process.env.TZ = 'Asia/Ho_Chi_Minh'
-  const date = new Date()
-
-  const order = await Order.create({ sessionId: cookieSessionId })
-  const session = await CartSession.findByPk(cookieSessionId, {
+  const query = { id: cookieSessionId }
+  if (req.user) {
+    query.userId = req.user.id
+  }
+  const session = await CartSession.findOne({
+    where: query,
     include: [
       {
         model: Product,
@@ -29,6 +31,17 @@ router.post('/create_payment_url', async function (req, res, next) {
       }
     ]
   })
+
+  if (!session) {
+    return res.status(404).json({ success: false, message: 'Cart not found' })
+  }
+
+  process.env.TZ = 'Asia/Ho_Chi_Minh'
+  const date = new Date()
+
+  const order = await Order.create(
+    req.user ? { sessionId: session.id, userId: req.user.id } : { sessionId: session.id }
+  )
 
   let amount = 0
 
@@ -101,7 +114,7 @@ router.get('/return', async function (req, res, next) {
   const hmac = crypto.createHmac('sha512', process.env.VNP_HASH_SECRET)
   const signed = hmac.update(Buffer.from(vnpQueryParamsQS, 'utf-8')).digest('hex')
 
-  const order = await Order.findByPk(vnpQueryParams['TxnRef'])
+  const order = await Order.findByPk(vnpQueryParams['vnp_TxnRef'])
 
   let message = Constants.VNPAY_RSP_CODES_PAY.find((item) => item.rspCode == '97').message
   let success = false
@@ -110,7 +123,7 @@ router.get('/return', async function (req, res, next) {
     const rspCode = vnpQueryParams['vnp_ResponseCode']
     message = Constants.VNPAY_RSP_CODES_PAY.find((item) => item.rspCode == rspCode)?.message
     if (rspCode == '00') {
-      await order.update({ status: 'success' })
+      await order.update({ paymentStatus: 'success' })
       success = true
 
       const session = await CartSession.findByPk(order.sessionId)

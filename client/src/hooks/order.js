@@ -8,3 +8,14 @@ export async function createPaymentUrl() {
   })
   return res.json()
 }
+
+export async function getOrders() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_ROOT}/order`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  return res.json()
+}
